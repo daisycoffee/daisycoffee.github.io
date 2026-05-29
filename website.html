@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Typewriter Page</title>
+
+<!-- Typewriter-style font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Goudy+Bookletter+1911&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:'Goudy Bookletter 1911', serif;
+  color:#2b2b2b;
+
+  /* realistic parchment background */
+  background-image: url("https://images.unsplash.com/photo-1691415780179-d6c7b98f1493?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+body::before {
+  content:"";
+  position:fixed;
+  inset:0;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.25) 100%);
+  pointer-events:none;
+}
+
+#typewriter {
+  font-size:1.5rem;
+  text-align:center;
+  line-height:1.6;
+  max-width:700px;
+  letter-spacing:0.03em;
+  color:#4b3f2a; /* ink color */
+  text-shadow: 0 0 0.3px #1f1b12, 0 0 1px rgba(0,0,0,0.25);
+  opacity:0.95;
+  filter: blur(0.2px);
+}
+
+.cursor {
+  display:inline-block;
+  width:3px;
+  height:1em;
+  background:#4b3f2a;
+  margin-left:4px;
+  animation:blink 1.2s infinite;
+}
+
+@keyframes blink {
+  0%,100% {opacity:1;}
+  50% {opacity:0;}
+}
+
+/* dissolve animation */
+.dissolve {
+  animation:inkFade 1.5s forwards;
+}
+
+@keyframes inkFade {
+  0% {opacity:1; filter:blur(0px);}
+  50% {opacity:0.6;}
+  100% {opacity:0; filter:blur(2px);}
+}
+
+a {
+  color:#4a3a1a;
+  text-decoration:underline;
+}
+
+a:hover {
+  color:#2b2415;
+}
+</style>
+</head>
+
+<body>
+<div id="typewriter">
+  <span id="text"></span><span class="cursor"></span>
+</div>
+
+<script>
+const firstWord = "Interesting...";
+const secondText =
+'You know they say curiosity killed the cat...<br>but satisfaction brought it <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">back</a>';
+
+const speed = 200; // typing speed in ms
+
+let i = 0;
+let typingSecond = false;
+
+const textElement = document.getElementById("text");
+const container = document.getElementById("typewriter");
+
+function typeWriter() {
+  const currentText = typingSecond ? secondText : firstWord;
+
+  if (i < currentText.length) {
+
+    // Detect HTML tags
+    if (currentText[i] === "<") {
+      const tagEnd = currentText.indexOf(">", i);
+      if (tagEnd !== -1) {
+        const tag = currentText.substring(i, tagEnd + 1);
+
+        // Pause cursor before inserting line break
+        if (tag === "<br>") {
+          setTimeout(() => {
+            textElement.innerHTML += "<br>";
+            i = tagEnd + 1;
+            typeWriter();
+          }, 1500); // pause before line break
+          return;
+        }
+
+        // Insert other tags instantly (like <a>)
+        textElement.innerHTML += tag;
+        i = tagEnd + 1;
+        setTimeout(typeWriter, tag.includes("a") ? 200 : 50);
+        return;
+      }
+    }
+
+    // Insert regular characters
+    textElement.innerHTML += currentText.charAt(i);
+    i++;
+    setTimeout(typeWriter, speed);
+
+  } else {
+    // After first line, dissolve and type second text
+    if (!typingSecond) {
+      setTimeout(() => {
+        container.classList.add("dissolve");
+        setTimeout(() => {
+          container.classList.remove("dissolve");
+          textElement.innerHTML = "";
+          i = 0;
+          typingSecond = true;
+          typeWriter();
+        }, 2500); // dissolve duration
+      }, 1000); // wait before dissolving
+    }
+  }
+}
+
+typeWriter();
+</script>
+</body>
+</html>
